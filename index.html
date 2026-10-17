@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Web Vierzen - Dashboard</title>
+    <!-- Favicon Logo Vierzen -->
+    <link rel="icon" type="image/png" href="logo_vierzen.png">
     <!-- Tailwind CSS CDN untuk Desain Modern -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- SheetJS untuk Export ke Excel -->
@@ -36,53 +38,76 @@
 </head>
 <body class="flex h-screen overflow-hidden text-[#4A0E0E]">
 
+    <!-- MOBILE OVERLAY BACKDROP -->
+    <div id="sidebarOverlay" onclick="toggleMobileSidebar()" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-30 hidden md:hidden smooth-transition"></div>
+
     <!-- SIDEBAR -->
-    <aside id="sidebar" class="w-72 bg-[#F4B41A] flex flex-col justify-between p-6 shadow-2xl z-20 smooth-transition relative shrink-0">
+    <aside id="sidebar" class="w-72 bg-[#F4B41A] flex flex-col justify-between p-6 shadow-2xl z-40 smooth-transition fixed inset-y-0 left-0 transform -translate-x-full md:translate-x-0 md:relative shrink-0">
         <div>
-            <!-- Logo & Title -->
-            <div class="flex items-center space-x-3 mb-10">
-                <img src="logo_vierzen.png" alt="Logo Vierzen" class="w-12 h-12 object-contain rounded-full bg-white p-1 shadow-md" onerror="this.src='https://via.placeholder.com/48?text=V'">
-                <div>
-                    <h1 class="font-bold text-lg tracking-wide text-[#4A0E0E]">VIERZEN</h1>
-                    <p class="text-xs text-[#5A1818] opacity-80">Badminton & Community</p>
+            <!-- Logo & Title & Minimize Toggle -->
+            <div class="flex items-center justify-between mb-10">
+                <div id="sidebarHeader" class="flex items-center space-x-3 overflow-hidden smooth-transition">
+                    <img src="logo_vierzen.png" alt="Logo Vierzen" class="w-12 h-12 shrink-0 object-contain rounded-full bg-white p-1 shadow-md" onerror="this.src='https://via.placeholder.com/48?text=V'">
+                    <div class="sidebar-text smooth-transition">
+                        <h1 class="font-bold text-lg tracking-wide text-[#4A0E0E] whitespace-nowrap">VIERZEN</h1>
+                        <p class="text-xs text-[#5A1818] opacity-80 whitespace-nowrap">Badminton & Community</p>
+                    </div>
                 </div>
+                <!-- Tombol Minimize (Desktop) & Close (Mobile) -->
+                <button onclick="toggleSidebar()" class="p-2 text-[#4A0E0E] hover:bg-white/30 rounded-xl smooth-transition hidden md:flex items-center justify-center" title="Minimize Sidebar">
+                    <i id="minimizeIcon" class="fa-solid fa-angles-left"></i>
+                </button>
+                <button onclick="toggleMobileSidebar()" class="p-2 text-[#4A0E0E] hover:bg-white/30 rounded-xl smooth-transition md:hidden flex items-center justify-center">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
             </div>
 
             <!-- Navigation Links -->
             <nav class="space-y-2">
-                <button onclick="switchTab('dashboard')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-left smooth-transition bg-[#5A1818] text-white shadow-lg" data-target="dashboard">
-                    <i class="fa-solid fa-house w-5"></i>
-                    <span>Dashboard</span>
+                <button onclick="switchTab('dashboard')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-left smooth-transition bg-[#5A1818] text-white shadow-lg" data-target="dashboard" title="Dashboard">
+                    <i class="fa-solid fa-house w-5 shrink-0 text-center"></i>
+                    <span class="sidebar-text smooth-transition whitespace-nowrap">Dashboard</span>
                 </button>
-                <button onclick="switchTab('bukukas')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-left smooth-transition text-[#4A0E0E] hover:bg-white/40" data-target="bukukas">
-                    <i class="fa-solid fa-book-open w-5"></i>
-                    <span>Buku Kas Vierzen</span>
+                <button onclick="switchTab('bukukas')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-left smooth-transition text-[#4A0E0E] hover:bg-white/40" data-target="bukukas" title="Buku Kas Vierzen">
+                    <i class="fa-solid fa-book-open w-5 shrink-0 text-center"></i>
+                    <span class="sidebar-text smooth-transition whitespace-nowrap">Buku Kas Vierzen</span>
                 </button>
-                <button onclick="switchTab('absensi')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-left smooth-transition text-[#4A0E0E] hover:bg-white/40" data-target="absensi">
-                    <i class="fa-solid fa-clipboard-user w-5"></i>
-                    <span>Absensi Mingguan Murid</span>
+                <button onclick="switchTab('absensi')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-left smooth-transition text-[#4A0E0E] hover:bg-white/40" data-target="absensi" title="Absensi Mingguan Murid">
+                    <i class="fa-solid fa-clipboard-user w-5 shrink-0 text-center"></i>
+                    <span class="sidebar-text smooth-transition whitespace-nowrap">Absensi Mingguan Murid</span>
                 </button>
             </nav>
         </div>
 
         <!-- Sidebar Footer info -->
-        <div class="text-xs text-[#5A1818] opacity-70 text-center pt-4 border-t border-[#4A0E0E]/10">
+        <div class="sidebar-text text-xs text-[#5A1818] opacity-70 text-center pt-4 border-t border-[#4A0E0E]/10 smooth-transition whitespace-nowrap">
             Vierzen System v2.0
         </div>
     </aside>
 
     <!-- MAIN CONTENT CONTAINER -->
-    <main class="flex-1 flex flex-col h-screen overflow-y-auto bg-[#FAF4F0] p-8 relative">
+    <main class="flex-1 flex flex-col h-screen overflow-y-auto bg-[#FAF4F0] p-6 md:p-8 relative w-full">
         
+        <!-- MOBILE HEADER BAR (Hamburger ala Gemini) -->
+        <div class="md:hidden flex items-center mb-6 bg-white p-3 rounded-2xl shadow-xs border border-[#4A0E0E]/10">
+            <button onclick="toggleMobileSidebar()" class="p-2 text-[#4A0E0E] hover:bg-[#FAF4F0] rounded-xl smooth-transition mr-3">
+                <i class="fa-solid fa-bars text-xl"></i>
+            </button>
+            <div class="flex items-center space-x-2">
+                <img src="logo_vierzen.png" alt="Logo" class="w-8 h-8 object-contain rounded-full bg-white p-0.5 shadow-xs" onerror="this.src='https://via.placeholder.com/32?text=V'">
+                <span class="font-bold text-sm text-[#4A0E0E]">Vierzen System</span>
+            </div>
+        </div>
+
         <!-- DASHBOARD TAB -->
         <section id="tab-dashboard" class="tab-content flex flex-col justify-center items-center h-full text-center animate-fade-in">
-            <div class="bg-white/80 backdrop-blur-md p-12 rounded-3xl shadow-xl max-w-2xl w-full border border-[#4A0E0E]/10 transform hover:scale-[1.01] smooth-transition">
+            <div class="bg-white/80 backdrop-blur-md p-8 md:p-12 rounded-3xl shadow-xl max-w-2xl w-full border border-[#4A0E0E]/10 transform hover:scale-[1.01] smooth-transition">
                 <img src="logo_vierzen.png" alt="Logo" class="w-24 h-24 mx-auto mb-6 object-contain drop-shadow-md" onerror="this.src='https://via.placeholder.com/96?text=Vierzen'">
-                <h1 class="text-4xl font-extrabold text-[#4A0E0E] mb-4 tracking-tight">Welcome To Vierzen!</h1>
-                <p class="text-[#6B3A3A] text-base leading-relaxed mb-8">
+                <h1 class="text-3xl md:text-4xl font-extrabold text-[#4A0E0E] mb-4 tracking-tight">Welcome To Vierzen!</h1>
+                <p class="text-[#6B3A3A] text-sm md:text-base leading-relaxed mb-8">
                     Platform terpusat untuk mempermudah akses informasi keuangan buku kas serta manajemen absensi mingguan murid dengan cepat, transparan, dan terintegrasi.
                 </p>
-                <div class="flex justify-center gap-4">
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
                     <button onclick="switchTab('bukukas')" class="px-6 py-3 bg-[#F4B41A] text-[#4A0E0E] font-semibold rounded-xl shadow-md hover:bg-[#e0a210] smooth-transition">
                         Cek Buku Kas
                     </button>
@@ -95,10 +120,10 @@
 
         <!-- BUKU KAS VIERZEN TAB -->
         <section id="tab-bukukas" class="tab-content hidden flex-col h-full">
-            <div class="mb-6 flex justify-between items-center">
+            <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h2 class="text-3xl font-bold text-[#4A0E0E]">Buku Kas Vierzen</h2>
-                    <p class="text-sm text-[#7A4A4A]">Laporan keuangan transparan bersumber dari data spreadsheet (CSV).</p>
+                    <h2 class="text-2xl md:text-3xl font-bold text-[#4A0E0E]">Buku Kas Vierzen</h2>
+                    <p class="text-xs md:text-sm text-[#7A4A4A]">Laporan keuangan transparan bersumber dari data spreadsheet (CSV).</p>
                 </div>
                 <div>
                     <button onclick="loadCsvData()" class="px-4 py-2 bg-[#5A1818] text-white text-sm font-semibold rounded-xl hover:bg-[#431212] smooth-transition shadow flex items-center gap-2">
@@ -110,7 +135,7 @@
             <!-- Tabel Buku Kas -->
             <div class="flex-1 bg-white rounded-2xl shadow-md border border-[#4A0E0E]/10 overflow-hidden flex flex-col">
                 <div class="overflow-x-auto flex-1">
-                    <table id="cashTable" class="w-full text-left border-collapse">
+                    <table id="cashTable" class="w-full text-left border-collapse min-w-[600px]">
                         <thead class="bg-[#5A1818] text-white sticky top-0">
                             <tr id="tableHeader">
                                 <th class="p-4 font-semibold text-sm">Tanggal</th>
@@ -134,7 +159,7 @@
         <!-- ABSENSI MINGGUAN MURID TAB -->
         <section id="tab-absensi" class="tab-content hidden flex-col max-w-4xl mx-auto w-full pb-10">
             <div class="mb-6">
-                <h2 class="text-3xl font-bold text-[#4A0E0E] text-center mb-1">Absensi Mingguan Murid</h2>
+                <h2 class="text-2xl md:text-3xl font-bold text-[#4A0E0E] text-center mb-1">Absensi Mingguan Murid</h2>
                 <p class="text-xs text-center text-[#7A4A4A]">Catat kehadiran, kelola data siswa, dan sinkronkan secara real-time.</p>
             </div>
 
@@ -142,7 +167,7 @@
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-[#4A0E0E]/10 mb-4 flex flex-col sm:flex-row gap-4 items-center justify-between">
                 <div class="flex items-center gap-2 w-full sm:w-auto">
                     <span class="bg-[#5A1818] text-white px-3 py-2 rounded-xl text-sm"><i class="fa-solid fa-calendar-days"></i></span>
-                    <input type="date" id="attendanceDate" class="px-4 py-2 bg-[#FAF4F0] rounded-xl border border-[#4A0E0E]/20 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#F4B41A]">
+                    <input type="date" id="attendanceDate" class="px-4 py-2 bg-[#FAF4F0] rounded-xl border border-[#4A0E0E]/20 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#F4B41A] w-full sm:w-auto">
                 </div>
                 <div class="relative w-full sm:w-80">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
@@ -158,7 +183,7 @@
             </div>
 
             <!-- Action Buttons -->
-            <div class="flex gap-4 mb-8">
+            <div class="flex flex-col sm:flex-row gap-4 mb-8">
                 <button onclick="openAddStudentModal()" class="flex-1 py-3 bg-[#5A1818] text-white font-semibold rounded-xl shadow hover:bg-[#431212] smooth-transition flex items-center justify-center gap-2 text-sm">
                     <i class="fa-solid fa-user-plus"></i> Tambahkan Siswa
                 </button>
@@ -169,21 +194,21 @@
 
             <!-- BAGIAN BAWAH: REKAPITULASI DAN TOMBOL EXPORT EXCEL + RESET -->
             <div class="bg-white rounded-2xl shadow-sm border border-[#4A0E0E]/10 p-6 mb-6">
-                <div class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-3">
-                    <h3 class="text-lg font-bold text-[#4A0E0E] flex items-center gap-2">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
+                    <h3 class="text-base md:text-lg font-bold text-[#4A0E0E] flex items-center gap-2">
                         <i class="fa-solid fa-chart-pie text-[#F4B41A]"></i> Rekap Data Absen Keseluruhan Siswa
                     </h3>
-                    <div class="flex gap-2 w-full sm:w-auto">
+                    <div class="flex flex-wrap gap-2 w-full sm:w-auto">
                         <button onclick="exportAttendanceToExcel()" class="flex-1 sm:flex-none px-4 py-2.5 bg-green-700 text-white font-semibold rounded-xl text-xs hover:bg-green-800 smooth-transition flex items-center justify-center gap-2 shadow">
                             <i class="fa-solid fa-file-excel"></i> Rekap ke Excel
                         </button>
-                        <button onclick="resetAttendanceData()" class="flex-1 sm:flex-none px-4 py-2.5 bg-red-700 text-white font-semibold rounded-xl text-xs hover:bg-red-800 smooth-transition flex items-center justify-center gap-2 shadow" title="Hapus semua data absensi agar bersih untuk semester baru">
-                            <i class="fa-solid fa-trash-can"></i> Reset / Hapus Data
+                        <button onclick="resetAttendanceData()" class="flex-1 sm:flex-none px-4 py-2.5 bg-red-700 text-white font-semibold rounded-xl text-xs hover:bg-red-800 smooth-transition flex items-center justify-center gap-2 shadow" title="Hapus semua data absensi untuk periode baru">
+                            <i class="fa-solid fa-trash-can"></i> Reset Data
                         </button>
                     </div>
                 </div>
                 <div class="overflow-x-auto max-h-72">
-                    <table class="w-full text-left border-collapse">
+                    <table class="w-full text-left border-collapse min-w-[500px]">
                         <thead class="bg-[#FAF4F0] text-[#4A0E0E] sticky top-0 text-xs">
                             <tr>
                                 <th class="p-3 font-semibold">No</th>
@@ -394,7 +419,7 @@
 
                 card.innerHTML = `
                     <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 rounded-full ${isHadir ? 'bg-green-600 text-white' : (isTidakHadir ? 'bg-red-600 text-white' : 'bg-[#5A1818] text-white')} flex items-center justify-center font-bold text-sm shadow-sm">
+                        <div class="w-10 h-10 shrink-0 rounded-full ${isHadir ? 'bg-green-600 text-white' : (isTidakHadir ? 'bg-red-600 text-white' : 'bg-[#5A1818] text-white')} flex items-center justify-center font-bold text-sm shadow-sm">
                             ${student.name.charAt(0)}
                         </div>
                         <div>
@@ -402,7 +427,7 @@
                             <p class="text-xs text-gray-500">Kelas: ${student.class || 'Umum'}</p>
                         </div>
                     </div>
-                    <div class="flex items-center space-x-2">
+                    <div class="flex items-center space-x-2 shrink-0">
                         <button type="button" onclick="window.toggleAttendance('${student.id}', true)" title="Hadir" class="px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 smooth-transition ${isHadir ? 'bg-green-600 text-white shadow ring-2 ring-green-400' : 'bg-gray-200 text-gray-600 hover:bg-green-100'}">
                             <i class="fa-solid fa-check"></i> Hadir
                         </button>
@@ -516,7 +541,6 @@
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap Absen");
             
-            // Download file Excel
             XLSX.writeFile(workbook, `Rekap_Absen_Vierzen_${currentDate}.xlsx`);
         };
 
@@ -527,9 +551,7 @@
 
             const currentDate = document.getElementById('attendanceDate').value;
             try {
-                // Hapus data dari state lokal
                 window.attendanceRecords = {};
-                // Hapus dokumen di Firebase Firestore berdasarkan tanggal aktif
                 await deleteDoc(doc(db, "absensi", currentDate));
                 
                 renderStudents();
@@ -537,7 +559,6 @@
                 alert("Data absensi berhasil direset/dihapus untuk memulai periode baru!");
             } catch (error) {
                 console.error("Gagal mereset data:", error);
-                // Reset lokal
                 window.attendanceRecords = {};
                 renderStudents();
                 renderAttendanceSummary();
@@ -572,9 +593,43 @@
         initApp();
     </script>
 
-    <!-- UI TAB SWITCHING & AUTOMATIC CSV PARSER LOGIC -->
+    <!-- UI TAB SWITCHING, SIDEBAR MINIMIZE & AUTOMATIC CSV PARSER LOGIC -->
     <script>
         const FIXED_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTmvQCqrahTIP5-QAswevHsttnqbFCOmZLpJ1XKPHW3EshjDqwpvghNPYGxtPrXhg/pub?output=csv";
+
+        let isSidebarMinimized = false;
+
+        // Fungsi Minimize Sidebar (Desktop)
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const minimizeIcon = document.getElementById('minimizeIcon');
+            const textElements = document.querySelectorAll('.sidebar-text');
+
+            isSidebarMinimized = !isSidebarMinimized;
+
+            if (isSidebarMinimized) {
+                sidebar.classList.remove('w-72');
+                sidebar.classList.add('w-20');
+                minimizeIcon.className = "fa-solid fa-angles-right";
+                textElements.forEach(el => el.style.display = 'none');
+            } else {
+                sidebar.classList.remove('w-20');
+                sidebar.classList.add('w-72');
+                minimizeIcon.className = "fa-solid fa-angles-left";
+                setTimeout(() => {
+                    textElements.forEach(el => el.style.display = 'block');
+                }, 150);
+            }
+        }
+
+        // Fungsi Buka/Tutup Sidebar Mobile (Ala Gemini)
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
 
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => {
@@ -594,6 +649,11 @@
                     btn.className = "nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-left smooth-transition text-[#4A0E0E] hover:bg-white/40";
                 }
             });
+
+            // Tutup sidebar di HP saat menu dipilih
+            if (window.innerWidth < 768) {
+                toggleMobileSidebar();
+            }
         }
 
         function openAddStudentModal() {
