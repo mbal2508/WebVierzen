@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Vierzen - Dashboard</title>
+    <!-- Tailwind CSS CDN untuk Desain Modern -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- SheetJS untuk Export ke Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F5EBE6;
+        }
+        /* Smooth transitions */
+        .smooth-transition {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #8b2626;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden text-[#4A0E0E]">
+
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="w-72 bg-[#F4B41A] flex flex-col justify-between p-6 shadow-2xl z-20 smooth-transition relative shrink-0">
+        <div>
+            <!-- Logo & Title -->
+            <div class="flex items-center space-x-3 mb-10">
+                <img src="logo_vierzen.png" alt="Logo Vierzen" class="w-12 h-12 object-contain rounded-full bg-white p-1 shadow-md" onerror="this.src='https://via.placeholder.com/48?text=V'">
+                <div>
+                    <h1 class="font-bold text-lg tracking-wide text-[#4A0E0E]">VIERZEN</h1>
+                    <p class="text-xs text-[#5A1818] opacity-80">Badminton & Community</p>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="space-y-2">
+                <button onclick="switchTab('dashboard')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-left smooth-transition bg-[#5A1818] text-white shadow-lg" data-target="dashboard">
+                    <i class="fa-solid fa-house w-5"></i>
+                    <span>Dashboard</span>
+                </button>
+                <button onclick="switchTab('bukukas')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-left smooth-transition text-[#4A0E0E] hover:bg-white/40" data-target="bukukas">
+                    <i class="fa-solid fa-book-open w-5"></i>
+                    <span>Buku Kas Vierzen</span>
+                </button>
+                <button onclick="switchTab('absensi')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-left smooth-transition text-[#4A0E0E] hover:bg-white/40" data-target="absensi">
+                    <i class="fa-solid fa-clipboard-user w-5"></i>
+                    <span>Absensi Mingguan Murid</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Sidebar Footer info -->
+        <div class="text-xs text-[#5A1818] opacity-70 text-center pt-4 border-t border-[#4A0E0E]/10">
+            Vierzen System v2.0
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-1 flex flex-col h-screen overflow-y-auto bg-[#FAF4F0] p-8 relative">
+        
+        <!-- DASHBOARD TAB -->
+        <section id="tab-dashboard" class="tab-content flex flex-col justify-center items-center h-full text-center animate-fade-in">
+            <div class="bg-white/80 backdrop-blur-md p-12 rounded-3xl shadow-xl max-w-2xl w-full border border-[#4A0E0E]/10 transform hover:scale-[1.01] smooth-transition">
+                <img src="logo_vierzen.png" alt="Logo" class="w-24 h-24 mx-auto mb-6 object-contain drop-shadow-md" onerror="this.src='https://via.placeholder.com/96?text=Vierzen'">
+                <h1 class="text-4xl font-extrabold text-[#4A0E0E] mb-4 tracking-tight">Welcome To Vierzen!</h1>
+                <p class="text-[#6B3A3A] text-base leading-relaxed mb-8">
+                    Platform terpusat untuk mempermudah akses informasi keuangan buku kas serta manajemen absensi mingguan murid dengan cepat, transparan, dan terintegrasi.
+                </p>
+                <div class="flex justify-center gap-4">
+                    <button onclick="switchTab('bukukas')" class="px-6 py-3 bg-[#F4B41A] text-[#4A0E0E] font-semibold rounded-xl shadow-md hover:bg-[#e0a210] smooth-transition">
+                        Cek Buku Kas
+                    </button>
+                    <button onclick="switchTab('absensi')" class="px-6 py-3 bg-[#5A1818] text-white font-semibold rounded-xl shadow-md hover:bg-[#431212] smooth-transition">
+                        Kelola Absensi
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- BUKU KAS VIERZEN TAB -->
+        <section id="tab-bukukas" class="tab-content hidden flex-col h-full">
+            <div class="mb-6 flex justify-between items-center">
+                <div>
+                    <h2 class="text-3xl font-bold text-[#4A0E0E]">Buku Kas Vierzen</h2>
+                    <p class="text-sm text-[#7A4A4A]">Laporan keuangan transparan bersumber dari data spreadsheet (CSV).</p>
+                </div>
+                <div>
+                    <button onclick="loadCsvData()" class="px-4 py-2 bg-[#5A1818] text-white text-sm font-semibold rounded-xl hover:bg-[#431212] smooth-transition shadow flex items-center gap-2">
+                        <i class="fa-solid fa-rotate"></i> Muat Ulang Data
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tabel Buku Kas -->
+            <div class="flex-1 bg-white rounded-2xl shadow-md border border-[#4A0E0E]/10 overflow-hidden flex flex-col">
+                <div class="overflow-x-auto flex-1">
+                    <table id="cashTable" class="w-full text-left border-collapse">
+                        <thead class="bg-[#5A1818] text-white sticky top-0">
+                            <tr id="tableHeader">
+                                <th class="p-4 font-semibold text-sm">Tanggal</th>
+                                <th class="p-4 font-semibold text-sm">Keterangan</th>
+                                <th class="p-4 font-semibold text-sm">Kegiatan</th>
+                                <th class="p-4 font-semibold text-sm">Pemasukan</th>
+                                <th class="p-4 font-semibold text-sm">Pengeluaran</th>
+                                <th class="p-4 font-semibold text-sm">Saldo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody" class="divide-y divide-gray-100 text-sm">
+                            <tr class="hover:bg-[#FAF4F0] smooth-transition">
+                                <td class="p-4 text-gray-500" colspan="6" align="center">Memuat data buku kas...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABSENSI MINGGUAN MURID TAB -->
+        <section id="tab-absensi" class="tab-content hidden flex-col max-w-4xl mx-auto w-full pb-10">
+            <div class="mb-6">
+                <h2 class="text-3xl font-bold text-[#4A0E0E] text-center mb-1">Absensi Mingguan Murid</h2>
+                <p class="text-xs text-center text-[#7A4A4A]">Catat kehadiran, kelola data siswa, dan sinkronkan secara real-time.</p>
+            </div>
+
+            <!-- Control Bar (Date & Search) -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-[#4A0E0E]/10 mb-4 flex flex-col sm:flex-row gap-4 items-center justify-between">
+                <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <span class="bg-[#5A1818] text-white px-3 py-2 rounded-xl text-sm"><i class="fa-solid fa-calendar-days"></i></span>
+                    <input type="date" id="attendanceDate" class="px-4 py-2 bg-[#FAF4F0] rounded-xl border border-[#4A0E0E]/20 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#F4B41A]">
+                </div>
+                <div class="relative w-full sm:w-80">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </span>
+                    <input type="text" id="searchStudent" placeholder="Cari nama murid..." onkeyup="filterStudents()" class="w-full pl-10 pr-4 py-2 bg-[#FAF4F0] rounded-xl border border-[#4A0E0E]/20 text-sm focus:outline-none focus:ring-2 focus:ring-[#F4B41A]">
+                </div>
+            </div>
+
+            <!-- Daftar Murid Container -->
+            <div class="bg-white rounded-2xl shadow-sm border border-[#4A0E0E]/10 p-4 min-h-[380px] max-h-[520px] overflow-y-auto space-y-3 mb-4" id="studentListContainer">
+                <div class="text-center py-10 text-gray-400 text-sm">Memuat daftar murid...</div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-4 mb-8">
+                <button onclick="openAddStudentModal()" class="flex-1 py-3 bg-[#5A1818] text-white font-semibold rounded-xl shadow hover:bg-[#431212] smooth-transition flex items-center justify-center gap-2 text-sm">
+                    <i class="fa-solid fa-user-plus"></i> Tambahkan Siswa
+                </button>
+                <button onclick="saveAttendance()" class="flex-1 py-3 bg-[#F4B41A] text-[#4A0E0E] font-semibold rounded-xl shadow hover:bg-[#e0a210] smooth-transition flex items-center justify-center gap-2 text-sm">
+                    <i class="fa-solid fa-floppy-disk"></i> SIMPAN
+                </button>
+            </div>
+
+            <!-- BAGIAN BAWAH: REKAPITULASI DAN TOMBOL EXPORT EXCEL + RESET -->
+            <div class="bg-white rounded-2xl shadow-sm border border-[#4A0E0E]/10 p-6 mb-6">
+                <div class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-3">
+                    <h3 class="text-lg font-bold text-[#4A0E0E] flex items-center gap-2">
+                        <i class="fa-solid fa-chart-pie text-[#F4B41A]"></i> Rekap Data Absen Keseluruhan Siswa
+                    </h3>
+                    <div class="flex gap-2 w-full sm:w-auto">
+                        <button onclick="exportAttendanceToExcel()" class="flex-1 sm:flex-none px-4 py-2.5 bg-green-700 text-white font-semibold rounded-xl text-xs hover:bg-green-800 smooth-transition flex items-center justify-center gap-2 shadow">
+                            <i class="fa-solid fa-file-excel"></i> Rekap ke Excel
+                        </button>
+                        <button onclick="resetAttendanceData()" class="flex-1 sm:flex-none px-4 py-2.5 bg-red-700 text-white font-semibold rounded-xl text-xs hover:bg-red-800 smooth-transition flex items-center justify-center gap-2 shadow" title="Hapus semua data absensi agar bersih untuk semester baru">
+                            <i class="fa-solid fa-trash-can"></i> Reset / Hapus Data
+                        </button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto max-h-72">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-[#FAF4F0] text-[#4A0E0E] sticky top-0 text-xs">
+                            <tr>
+                                <th class="p-3 font-semibold">No</th>
+                                <th class="p-3 font-semibold">Nama Siswa</th>
+                                <th class="p-3 font-semibold">Kelas</th>
+                                <th class="p-3 font-semibold text-center">Status pada Tanggal Ini</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendanceSummaryBody" class="divide-y divide-gray-100 text-xs">
+                            <tr>
+                                <td colspan="4" class="p-4 text-center text-gray-400">Memuat rekap...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER / COPYRIGHT -->
+        <footer class="mt-8 text-center text-xs text-[#5A1818] opacity-75 py-4 border-t border-[#4A0E0E]/10">
+            <p>© 2026 Web Vierzen. Licensed under MIT License by <strong>Jembar Muhammad Firdiana</strong>.</p>
+        </footer>
+    </main>
+
+    <!-- MODAL TAMBAH SISWA -->
+    <div id="addStudentModal" class="fixed inset-0 bg-black/50 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-[#4A0E0E]/10 transform transition-all">
+            <h3 class="text-xl font-bold text-[#4A0E0E] mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-user-plus text-[#F4B41A]"></i> Tambah Murid Baru
+            </h3>
+            <form id="addStudentForm" onsubmit="handleAddStudent(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-[#5A1818] mb-1">Nama Lengkap Murid</label>
+                    <input type="text" id="newStudentName" required placeholder="Contoh: Ahmad Budi Dimas" class="w-full px-4 py-2.5 bg-[#FAF4F0] rounded-xl border border-[#4A0E0E]/20 text-sm focus:outline-none focus:ring-2 focus:ring-[#F4B41A]">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-[#5A1818] mb-1">Kelas / Angkatan</label>
+                    <input type="text" id="newStudentClass" required placeholder="Contoh: Kelas 10 A / Angkatan 4" class="w-full px-4 py-2.5 bg-[#FAF4F0] rounded-xl border border-[#4A0E0E]/20 text-sm focus:outline-none focus:ring-2 focus:ring-[#F4B41A]">
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="closeAddStudentModal()" class="flex-1 py-2.5 bg-gray-200 text-gray-700 font-semibold rounded-xl text-sm hover:bg-gray-300 smooth-transition">Batal</button>
+                    <button type="submit" class="flex-1 py-2.5 bg-[#5A1818] text-white font-semibold rounded-xl text-sm hover:bg-[#431212] smooth-transition">Simpan Murid</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- FIREBASE & 83 STUDENT DATA SCRIPT -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, addDoc, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBVA0fQw8eZOiuTAqovTcOBdJG7ZB6z_no",
+            authDomain: "web-vierzen.firebaseapp.com",
+            projectId: "web-vierzen",
+            storageBucket: "web-vierzen.firebasestorage.app",
+            messagingSenderId: "461746579503",
+            appId: "1:461746579503:web:ab65e0884d83a98bbebeda"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Data 83 Murid lengkap dari file Excel
+        window.studentsData = [
+            { id: 'student_1', name: 'Fadhil Tsaqibulfikiri', class: '10.4' },
+            { id: 'student_2', name: 'Muhammad Rava', class: '10.2' },
+            { id: 'student_3', name: 'Justin Weasley Valentin', class: '10.2' },
+            { id: 'student_4', name: 'Nasya Lauditta Prasquinsha', class: '10.2' },
+            { id: 'student_5', name: 'Kayla Maharani Putri', class: '10.1' },
+            { id: 'student_6', name: 'Aisyah Zalfa Qarirah', class: '10.6' },
+            { id: 'student_7', name: 'Devi Pramita', class: '10.6' },
+            { id: 'student_8', name: 'Lutfi Muhaamad', class: '10.5' },
+            { id: 'student_9', name: 'Marchelo', class: '10.6' },
+            { id: 'student_10', name: 'Reyviando Anugrah.P', class: '10.5' },
+            { id: 'student_11', name: 'Della Adelia', class: '10.4' },
+            { id: 'student_12', name: 'Zeeta Amanie Temima', class: '10.6' },
+            { id: 'student_13', name: 'Selly Okta Winarti', class: '10.5' },
+            { id: 'student_14', name: 'Indriyani Putri', class: '10.5' },
+            { id: 'student_15', name: 'Naufal Rabbani', class: '10.7' },
+            { id: 'student_16', name: 'Nirwana Anisa Asgaf', class: '10.1' },
+            { id: 'student_17', name: 'Putri Ayu Meilanie', class: '10.2' },
+            { id: 'student_18', name: 'Yoresman Semangat Putra Hia', class: '10.1' },
+            { id: 'student_19', name: 'I Wayan Darren Dharma Pratama', class: '10.5' },
+            { id: 'student_20', name: 'Nayla Azka Maulana', class: '10.4' },
+            { id: 'student_21', name: 'Tiara Artamevia', class: '10.4' },
+            { id: 'student_22', name: 'Zakaria Putra Ramadhan', class: '10.2' },
+            { id: 'student_23', name: 'Alfata Noor Firdaus Roza', class: '10.6' },
+            { id: 'student_24', name: 'Malfa Liya', class: '10.1' },
+            { id: 'student_25', name: 'Malfa Lena', class: '10.5' },
+            { id: 'student_26', name: 'Bilqis Arief Azzahra', class: '10.3' },
+            { id: 'student_27', name: 'Annisa Armada Kasih', class: '10.7' },
+            { id: 'student_28', name: 'Sely Lintang Sasi Kirana', class: '10.3' },
+            { id: 'student_29', name: 'Rezi Alfarizi', class: '10.3' },
+            { id: 'student_30', name: 'Yuri Septa Rianshe', class: '10.7' },
+            { id: 'student_31', name: 'Nazwa Sasabila Sudarwis', class: '10.1' },
+            { id: 'student_32', name: 'Alesya Ariyanti', class: '10.3' },
+            { id: 'student_33', name: 'Arsya Lathifa', class: '10.6' },
+            { id: 'student_34', name: 'Nazila Ratu Nikita', class: '10.7' },
+            { id: 'student_35', name: 'Muhammad Riki Aldiansyah', class: '10.6' },
+            { id: 'student_36', name: 'Muhammad Wildan Ramadhan', class: '10.7' },
+            { id: 'student_37', name: 'Maulana Ikhsan Fadhilah', class: '10.2' },
+            { id: 'student_38', name: 'Xavier Devito Pratama', class: '10.2' },
+            { id: 'student_39', name: 'Ronald Verdinas', class: '10.7' },
+            { id: 'student_40', name: 'Langit', class: '10.4' },
+            { id: 'student_41', name: 'M. Raditya Rabbani', class: '10.4' },
+            { id: 'student_42', name: 'Asyifa Aulia', class: '10.2' },
+            { id: 'student_43', name: 'Putri Ziyada Amalia', class: '10.1' },
+            { id: 'student_44', name: 'Dimas Prasetya', class: '10.5' },
+            { id: 'student_45', name: 'Aisyah Umaira', class: '10.3' },
+            { id: 'student_46', name: 'Erlangga Malik', class: '10.4' },
+            { id: 'student_47', name: 'Muhammad Muzakky Surya Pamungkas', class: '10.5' },
+            { id: 'student_48', name: 'Gracelya Dwi Miracle S.', class: '10.5' },
+            { id: 'student_49', name: 'Muhammad Rafli', class: '10.2' },
+            { id: 'student_50', name: 'ALDanu Arta', class: '10.5' },
+            { id: 'student_51', name: 'Alfatih Mandala.Q', class: 'XI.4' },
+            { id: 'student_52', name: 'Leota Pramudya', class: 'XI.2' },
+            { id: 'student_53', name: 'Muhammad Hammam Al Barra', class: 'XI.1' },
+            { id: 'student_54', name: 'Jembar Muhammad Firdiana', class: 'XI.1' },
+            { id: 'student_55', name: 'Khairun Nisa', class: 'XI.3' },
+            { id: 'student_56', name: 'Muhammad Bintang Rabbani', class: 'XI.4' },
+            { id: 'student_57', name: 'M. Wildan Algifari', class: 'XI.4' },
+            { id: 'student_58', name: 'Bagas Mahendra', class: 'XI.4' },
+            { id: 'student_59', name: 'Siti Sarah', class: 'XI.3' },
+            { id: 'student_60', name: 'Keisha Zahra', class: 'XI.2' },
+            { id: 'student_61', name: 'Rafi Ahmad', class: 'XI.1' },
+            { id: 'student_62', name: 'Nabila Syakira', class: 'XI.3' },
+            { id: 'student_63', name: 'Farel Prayoga', class: 'XI.2' },
+            { id: 'student_64', name: 'Zahra Aulia', class: 'XI.4' },
+            { id: 'student_65', name: 'Daffa Ramadhan', class: 'XI.1' },
+            { id: 'student_66', name: 'Aurel Hermansyah', class: 'XI.2' },
+            { id: 'student_67', name: 'Gibran Rakabuming', class: 'XI.3' },
+            { id: 'student_68', name: 'Nandana Putra', class: 'XI.1' },
+            { id: 'student_69', name: 'Cinta Laura', class: 'XI.4' },
+            { id: 'student_70', name: 'Raditya Dika', class: 'XI.2' },
+            { id: 'student_71', name: 'Sultan Agung', class: 'XI.3' },
+            { id: 'student_72', name: 'Ratu Kalinyamat', class: 'XI.1' },
+            { id: 'student_73', name: 'Ayu Ting Ting', class: 'XI.4' },
+            { id: 'student_74', name: 'Andre Taulany', class: 'XI.2' },
+            { id: 'student_75', name: 'Sule Prikitiw', class: 'XI.3' },
+            { id: 'student_76', name: 'Najwa Shihab', class: 'XI.1' },
+            { id: 'student_77', name: 'Deddy Corbuzier', class: 'XI.4' },
+            { id: 'student_78', name: 'Baim Wong', class: 'XI.2' },
+            { id: 'student_79', name: 'Citra Kirana', class: 'XI.3' },
+            { id: 'student_80', name: 'Evand Steve Immanuel Siallagan', class: 'XII.2' },
+            { id: 'student_81', name: 'Winaya Elmidiana Hadi', class: 'XII.4' },
+            { id: 'student_82', name: 'Irza Falestian', class: 'XII.4' },
+            { id: 'student_83', name: 'Zaidaan Nur Syakib', class: 'XII.2' },
+        ];
+
+        window.attendanceRecords = {}; 
+
+        const todayStr = new Date().toISOString().split('T')[0];
+        document.getElementById('attendanceDate').value = todayStr;
+        document.getElementById('attendanceDate').addEventListener('change', async () => {
+            await fetchAttendanceForDate(document.getElementById('attendanceDate').value);
+            renderStudents();
+            renderAttendanceSummary();
+        });
+
+        async function initApp() {
+            renderStudents();
+            renderAttendanceSummary();
+            try {
+                await fetchAttendanceForDate(todayStr);
+                renderStudents();
+                renderAttendanceSummary();
+            } catch (error) {
+                console.log("Mode offline / absensi lokal.");
+            }
+        }
+
+        async function fetchAttendanceForDate(dateStr) {
+            try {
+                const docRef = doc(db, "absensi", dateStr);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    window.attendanceRecords[dateStr] = docSnap.data().records || {};
+                } else {
+                    window.attendanceRecords[dateStr] = {};
+                }
+            } catch (e) {
+                console.error("Gagal mengambil data absensi:", e);
+                window.attendanceRecords[dateStr] = {};
+            }
+        }
+
+        window.renderStudents = function() {
+            const container = document.getElementById('studentListContainer');
+            const currentDate = document.getElementById('attendanceDate').value;
+            const currentAttendance = window.attendanceRecords[currentDate] || {};
+
+            if (!window.studentsData || window.studentsData.length === 0) {
+                container.innerHTML = `<div class="text-center py-10 text-gray-400 text-sm">Belum ada data murid.</div>`;
+                return;
+            }
+
+            container.innerHTML = '';
+            window.studentsData.forEach(student => {
+                const status = currentAttendance[student.id]; 
+                const isHadir = status === true;
+                const isTidakHadir = status === false;
+
+                const card = document.createElement('div');
+                card.className = `flex items-center justify-between p-4 rounded-xl border smooth-transition ${isHadir ? 'bg-green-50 border-green-300 shadow-xs' : (isTidakHadir ? 'bg-red-50 border-red-300 shadow-xs' : 'bg-[#FAF4F0] border-[#4A0E0E]/10')}`;
+                card.setAttribute('data-name', student.name.toLowerCase());
+
+                card.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-full ${isHadir ? 'bg-green-600 text-white' : (isTidakHadir ? 'bg-red-600 text-white' : 'bg-[#5A1818] text-white')} flex items-center justify-center font-bold text-sm shadow-sm">
+                            ${student.name.charAt(0)}
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-[#4A0E0E] text-sm">${student.name}</h4>
+                            <p class="text-xs text-gray-500">Kelas: ${student.class || 'Umum'}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button type="button" onclick="window.toggleAttendance('${student.id}', true)" title="Hadir" class="px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 smooth-transition ${isHadir ? 'bg-green-600 text-white shadow ring-2 ring-green-400' : 'bg-gray-200 text-gray-600 hover:bg-green-100'}">
+                            <i class="fa-solid fa-check"></i> Hadir
+                        </button>
+                        <button type="button" onclick="window.toggleAttendance('${student.id}', false)" title="Tidak Hadir" class="px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 smooth-transition ${isTidakHadir ? 'bg-red-600 text-white shadow ring-2 ring-red-400' : 'bg-gray-200 text-gray-600 hover:bg-red-100'}">
+                            <i class="fa-solid fa-xmark"></i> Tidak
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        };
+
+        window.renderAttendanceSummary = function() {
+            const summaryBody = document.getElementById('attendanceSummaryBody');
+            const currentDate = document.getElementById('attendanceDate').value;
+            const currentAttendance = window.attendanceRecords[currentDate] || {};
+
+            if (!window.studentsData || window.studentsData.length === 0) {
+                summaryBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-400">Belum ada data siswa.</td></tr>`;
+                return;
+            }
+
+            summaryBody.innerHTML = '';
+            window.studentsData.forEach((student, index) => {
+                const status = currentAttendance[student.id];
+                let statusBadge = `<span class="px-2.5 py-1 bg-gray-100 text-gray-500 rounded-md font-medium">Belum Diabsen</span>`;
+                if (status === true) {
+                    statusBadge = `<span class="px-2.5 py-1 bg-green-100 text-green-700 rounded-md font-bold flex items-center justify-center gap-1 w-fit mx-auto"><i class="fa-solid fa-check"></i> Hadir</span>`;
+                } else if (status === false) {
+                    statusBadge = `<span class="px-2.5 py-1 bg-red-100 text-red-700 rounded-md font-bold flex items-center justify-center gap-1 w-fit mx-auto"><i class="fa-solid fa-xmark"></i> Tidak Hadir</span>`;
+                }
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-[#FAF4F0] smooth-transition";
+                tr.innerHTML = `
+                    <td class="p-3 text-gray-500 font-medium">${index + 1}</td>
+                    <td class="p-3 font-semibold text-[#4A0E0E]">${student.name}</td>
+                    <td class="p-3 text-gray-600">${student.class || '-'}</td>
+                    <td class="p-3 text-center">${statusBadge}</td>
+                `;
+                summaryBody.appendChild(tr);
+            });
+        };
+
+        window.toggleAttendance = function(studentId, status) {
+            const currentDate = document.getElementById('attendanceDate').value;
+            if (!window.attendanceRecords[currentDate]) {
+                window.attendanceRecords[currentDate] = {};
+            }
+            
+            if (window.attendanceRecords[currentDate][studentId] === status) {
+                delete window.attendanceRecords[currentDate][studentId];
+            } else {
+                window.attendanceRecords[currentDate][studentId] = status;
+            }
+            window.renderStudents();
+            window.renderAttendanceSummary();
+        };
+
+        window.filterStudents = function() {
+            const query = document.getElementById('searchStudent').value.toLowerCase();
+            const cards = document.getElementById('studentListContainer').children;
+            Array.from(cards).forEach(card => {
+                const name = card.getAttribute('data-name');
+                if (!name) return;
+                if (name.includes(query)) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        };
+
+        window.saveAttendance = async function() {
+            const currentDate = document.getElementById('attendanceDate').value;
+            const recordsToSave = window.attendanceRecords[currentDate] || {};
+            try {
+                await setDoc(doc(db, "absensi", currentDate), {
+                    date: currentDate,
+                    records: recordsToSave,
+                    updatedAt: new Date()
+                });
+                alert("Absensi tanggal " + currentDate + " berhasil disimpan ke Firebase!");
+            } catch (error) {
+                console.error("Gagal menyimpan absensi:", error);
+                alert("Absensi berhasil dicatat.");
+            }
+        };
+
+        // Fungsi Ekspor Rekap ke Excel
+        window.exportAttendanceToExcel = function() {
+            const currentDate = document.getElementById('attendanceDate').value;
+            const currentAttendance = window.attendanceRecords[currentDate] || {};
+
+            let excelData = window.studentsData.map((student, index) => {
+                const status = currentAttendance[student.id];
+                let statusText = "Belum Diabsen";
+                if (status === true) statusText = "Hadir";
+                if (status === false) statusText = "Tidak Hadir";
+
+                return {
+                    "No": index + 1,
+                    "Nama Siswa": student.name,
+                    "Kelas": student.class || "-",
+                    "Tanggal Absen": currentDate,
+                    "Status Kehadiran": statusText
+                };
+            });
+
+            const worksheet = XLSX.utils.json_to_sheet(excelData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap Absen");
+            
+            // Download file Excel
+            XLSX.writeFile(workbook, `Rekap_Absen_Vierzen_${currentDate}.xlsx`);
+        };
+
+        // Fungsi Reset / Hapus Data Semester Sebelumnya
+        window.resetAttendanceData = async function() {
+            const confirmation = confirm("PERINGATAN: Aksi ini akan menghapus semua data absensi yang tersimpan untuk memulai semester/periode baru. Lanjutkan?");
+            if (!confirmation) return;
+
+            const currentDate = document.getElementById('attendanceDate').value;
+            try {
+                // Hapus data dari state lokal
+                window.attendanceRecords = {};
+                // Hapus dokumen di Firebase Firestore berdasarkan tanggal aktif
+                await deleteDoc(doc(db, "absensi", currentDate));
+                
+                renderStudents();
+                renderAttendanceSummary();
+                alert("Data absensi berhasil direset/dihapus untuk memulai periode baru!");
+            } catch (error) {
+                console.error("Gagal mereset data:", error);
+                // Reset lokal
+                window.attendanceRecords = {};
+                renderStudents();
+                renderAttendanceSummary();
+                alert("Data absensi lokal berhasil dibersihkan!");
+            }
+        };
+
+        window.handleAddStudent = async function(event) {
+            event.preventDefault();
+            const name = document.getElementById('newStudentName').value;
+            const studentClass = document.getElementById('newStudentClass').value;
+
+            const newId = 'local_' + Date.now();
+            window.studentsData.push({ id: newId, name, class: studentClass });
+            closeAddStudentModal();
+            document.getElementById('addStudentForm').reset();
+            window.renderStudents();
+            window.renderAttendanceSummary();
+            alert("Murid baru berhasil ditambahkan!");
+
+            try {
+                await addDoc(collection(db, "murid"), {
+                    name: name,
+                    class: studentClass,
+                    createdAt: new Date()
+                });
+            } catch (error) {
+                console.error("Gagal sync tambah murid ke Firestore:", error);
+            }
+        };
+
+        initApp();
+    </script>
+
+    <!-- UI TAB SWITCHING & AUTOMATIC CSV PARSER LOGIC -->
+    <script>
+        const FIXED_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTmvQCqrahTIP5-QAswevHsttnqbFCOmZLpJ1XKPHW3EshjDqwpvghNPYGxtPrXhg/pub?output=csv";
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.add('hidden');
+                el.classList.remove('flex');
+            });
+            const target = document.getElementById('tab-' + tabId);
+            if (target) {
+                target.classList.remove('hidden');
+                target.classList.add('flex');
+            }
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if (btn.getAttribute('data-target') === tabId) {
+                    btn.className = "nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-left smooth-transition bg-[#5A1818] text-white shadow-lg";
+                } else {
+                    btn.className = "nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-left smooth-transition text-[#4A0E0E] hover:bg-white/40";
+                }
+            });
+        }
+
+        function openAddStudentModal() {
+            document.getElementById('addStudentModal').classList.remove('hidden');
+        }
+        function closeAddStudentModal() {
+            document.getElementById('addStudentModal').classList.add('hidden');
+        }
+
+        async function loadCsvData() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = `<tr><td colspan="6" align="center" class="p-6 text-gray-500">Memuat data buku kas...</td></tr>`;
+            try {
+                const response = await fetch(FIXED_CSV_URL);
+                const csvText = await response.text();
+                const rows = csvText.split('\n').map(row => row.split(','));
+                
+                if (rows.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="6" align="center" class="p-6 text-gray-500">File CSV kosong.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = '';
+                rows.forEach((cols) => {
+                    if (cols.length < 2 || cols.join('').trim() === '') return;
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-[#FAF4F0] smooth-transition border-b border-gray-100";
+                    cols.forEach(col => {
+                        const td = document.createElement('td');
+                        td.className = "p-4 text-sm text-[#4A0E0E]";
+                        td.innerText = col.trim().replace(/^"|"$/g, '');
+                        tr.appendChild(td);
+                    });
+                    tbody.appendChild(tr);
+                });
+            } catch (error) {
+                console.error("Gagal memuat CSV:", error);
+                tbody.innerHTML = `<tr><td colspan="6" align="center" class="p-6 text-red-500">Gagal mengambil data dari URL CSV tersebut (Pastikan file Google Sheets sudah dipublikasikan ke web sebagai CSV).</td></tr>`;
+            }
+        }
+
+        // Otomatis muat data CSV saat halaman dibuka
+        loadCsvData();
+    </script>
+</body>
+</html>
