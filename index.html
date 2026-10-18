@@ -192,18 +192,21 @@
                 </button>
             </div>
 
-            <!-- BAGIAN BAWAH: REKAPITULASI DAN TOMBOL EXPORT EXCEL + RESET -->
+            <!-- BAGIAN BAWAH: REKAPITULASI DAN TOMBOL (EXCEL, FORMAT WA, RESET) -->
             <div class="bg-white rounded-2xl shadow-sm border border-[#4A0E0E]/10 p-6 mb-6">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
                     <h3 class="text-base md:text-lg font-bold text-[#4A0E0E] flex items-center gap-2">
                         <i class="fa-solid fa-chart-pie text-[#F4B41A]"></i> Rekap Data Absen Keseluruhan Siswa
                     </h3>
                     <div class="flex flex-wrap gap-2 w-full sm:w-auto">
-                        <button onclick="exportAttendanceToExcel()" class="flex-1 sm:flex-none px-4 py-2.5 bg-green-700 text-white font-semibold rounded-xl text-xs hover:bg-green-800 smooth-transition flex items-center justify-center gap-2 shadow">
-                            <i class="fa-solid fa-file-excel"></i> Rekap ke Excel
+                        <button onclick="exportAttendanceToExcel()" class="flex-1 sm:flex-none px-3.5 py-2.5 bg-green-700 text-white font-semibold rounded-xl text-xs hover:bg-green-800 smooth-transition flex items-center justify-center gap-2 shadow" title="Download Excel">
+                            <i class="fa-solid fa-file-excel"></i> Excel
                         </button>
-                        <button onclick="resetAttendanceData()" class="flex-1 sm:flex-none px-4 py-2.5 bg-red-700 text-white font-semibold rounded-xl text-xs hover:bg-red-800 smooth-transition flex items-center justify-center gap-2 shadow" title="Hapus semua data absensi untuk periode baru">
-                            <i class="fa-solid fa-trash-can"></i> Reset Data
+                        <button onclick="openWhatsAppModal()" class="flex-1 sm:flex-none px-3.5 py-2.5 bg-emerald-600 text-white font-semibold rounded-xl text-xs hover:bg-emerald-700 smooth-transition flex items-center justify-center gap-2 shadow" title="Format Pesan WhatsApp">
+                            <i class="fa-brands fa-whatsapp text-sm"></i> Format WA
+                        </button>
+                        <button onclick="resetAttendanceData()" class="flex-1 sm:flex-none px-3.5 py-2.5 bg-red-700 text-white font-semibold rounded-xl text-xs hover:bg-red-800 smooth-transition flex items-center justify-center gap-2 shadow" title="Hapus semua data absensi">
+                            <i class="fa-solid fa-trash-can"></i> Reset
                         </button>
                     </div>
                 </div>
@@ -232,6 +235,28 @@
             <p>© 2026 Web Vierzen. Licensed under MIT License by <strong>Jembar Muhammad Firdiana</strong>.</p>
         </footer>
     </main>
+
+    <!-- MODAL WHATSAPP FORMAT -->
+    <div id="whatsappModal" class="fixed inset-0 bg-black/50 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 max-w-lg w-full shadow-2xl border border-[#4A0E0E]/10 transform transition-all flex flex-col max-h-[90vh]">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="text-lg font-bold text-[#4A0E0E] flex items-center gap-2">
+                    <i class="fa-brands fa-whatsapp text-emerald-600 text-xl"></i> Format Absen WhatsApp
+                </h3>
+                <button onclick="closeWhatsAppModal()" class="text-gray-400 hover:text-gray-600 p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <p class="text-xs text-gray-500 mb-3">Salin teks di bawah ini dan paste langsung ke grup WhatsApp Anda.</p>
+            <textarea id="whatsappTextArea" readonly class="w-full h-64 p-3 bg-[#FAF4F0] rounded-xl border border-[#4A0E0E]/20 text-xs font-mono focus:outline-none resize-none mb-4"></textarea>
+            <div class="flex gap-3">
+                <button type="button" onclick="closeWhatsAppModal()" class="flex-1 py-2.5 bg-gray-200 text-gray-700 font-semibold rounded-xl text-xs hover:bg-gray-300 smooth-transition">Tutup</button>
+                <button type="button" onclick="copyWhatsAppText()" class="flex-1 py-2.5 bg-emerald-600 text-white font-semibold rounded-xl text-xs hover:bg-emerald-700 smooth-transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-copy"></i> Salin Teks ke Clipboard
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- MODAL TAMBAH SISWA -->
     <div id="addStudentModal" class="fixed inset-0 bg-black/50 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
@@ -273,9 +298,8 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Data 83 Murid persis dari kedua foto spreadsheet yang Anda berikan
+        // Data 83 Murid persis dari spreadsheet
         window.studentsData = [
-            // Foto 1
             { id: 's_1', name: 'Abdillah Muhammad Yusuf', class: 'XI.4' },
             { id: 's_2', name: 'Adinda Nur Aini', class: 'XI.2' },
             { id: 's_3', name: 'Affandi Bachtiar', class: 'XI.1' },
@@ -309,7 +333,6 @@
             { id: 's_31', name: 'Winaya Elmidiana Hadi', class: 'XII.4' },
             { id: 's_32', name: 'Zaidaan Nur Syakib', class: 'XII.4' },
             { id: 's_33', name: 'Zivana Kaysa', class: 'XII.2' },
-            // Foto 2
             { id: 's_34', name: 'Aisyah Umaira', class: '10.4' },
             { id: 's_35', name: 'Aisyah Zalfa Qarirah', class: '10.2' },
             { id: 's_36', name: 'ALDanu Arta', class: '10.2' },
@@ -544,6 +567,67 @@
             XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap Absen");
             
             XLSX.writeFile(workbook, `Rekap_Absen_Vierzen_${currentDate}.xlsx`);
+        };
+
+        // Fungsi Format Teks WhatsApp
+        window.openWhatsAppModal = function() {
+            const currentDate = document.getElementById('attendanceDate').value;
+            const currentAttendance = window.attendanceRecords[currentDate] || {};
+
+            let totalHadir = 0;
+            let totalTidakHadir = 0;
+            let totalBelumDiabsen = 0;
+
+            let text = `📋 *REKAP ABSENSI MINGGUAN VIERZEN*\n`;
+            text += `📅 Tanggal: ${currentDate}\n`;
+            text += `-----------------------------------\n\n`;
+
+            window.studentsData.forEach((student, index) => {
+                const status = currentAttendance[student.id];
+                let mark = "❌";
+                let statusStr = "Tidak Hadir";
+
+                if (status === true) {
+                    mark = "✅";
+                    statusStr = "Hadir";
+                    totalHadir++;
+                } else if (status === false) {
+                    mark = "❌";
+                    statusStr = "Tidak Hadir";
+                    totalTidakHadir++;
+                } else {
+                    mark = "❌";
+                    statusStr = "Belum Diabsen";
+                    totalBelumDiabsen++;
+                }
+
+                text += `${index + 1}. ${student.name} (${student.class}) - ${mark} ${statusStr}\n`;
+            });
+
+            text += `\n-----------------------------------\n`;
+            text += `📊 *RINGKASAN KEHADIRAN*:\n`;
+            text += `✅ Hadir: ${totalHadir} siswa\n`;
+            text += `❌ Tidak Hadir / Belum: ${totalTidakHadir + totalBelumDiabsen} siswa\n`;
+            text += `👥 Total Seluruh Siswa: ${window.studentsData.length} siswa`;
+
+            document.getElementById('whatsappTextArea').value = text;
+            document.getElementById('whatsappModal').classList.remove('hidden');
+        };
+
+        window.closeWhatsAppModal = function() {
+            document.getElementById('whatsappModal').classList.add('hidden');
+        };
+
+        window.copyWhatsAppText = function() {
+            const textarea = document.getElementById('whatsappTextArea');
+            textarea.select();
+            textarea.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(textarea.value).then(() => {
+                alert("Teks format WhatsApp berhasil disalin ke clipboard!");
+                closeWhatsAppModal();
+            }).catch(err => {
+                alert("Gagal menyalin teks.");
+            });
         };
 
         // Fungsi Reset / Hapus Data Semester Sebelumnya
