@@ -36,25 +36,25 @@
 </head>
 <body class="flex h-screen overflow-hidden text-[#4A0E0E]">
 
-    <!-- ================= LAYAR LOGIN SEDERHANA ================= -->
+    <!-- ================= LAYAR LOGIN DARI FIRESTORE ================= -->
     <div id="loginScreen" class="fixed inset-0 bg-[#FAF4F0] z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-[#4A0E0E]/10 text-center animate-fade-in">
             <img src="logo_vierzen.png" alt="Logo Vierzen" class="w-20 h-20 mx-auto mb-4 object-contain rounded-full bg-[#FAF4F0] p-1 shadow-md" onerror="this.src='https://via.placeholder.com/80?text=V'">
             <h2 class="text-2xl font-extrabold text-[#4A0E0E] mb-1">Akses Terbatas Vierzen</h2>
-            <p class="text-xs text-[#7A4A4A] mb-6">Masukkan Username dan Password resmi untuk masuk ke dalam sistem.</p>
+            <p class="text-xs text-[#7A4A4A] mb-6">Masukkan Username dan Password resmi yang terdaftar di database.</p>
             
-            <form onsubmit="handleLogin(event)" class="space-y-4 text-left">
+            <form id="loginForm" onsubmit="handleLoginFromFirebase(event)" class="space-y-4 text-left">
                 <div>
                     <label class="block text-xs font-semibold text-[#5A1818] mb-1">Username</label>
-                    <input type="text" id="loginUser" required placeholder="Masukkan username..." class="w-full px-4 py-3 bg-[#FAF4F0] rounded-xl border border-[#4A0E0E]/20 text-sm focus:outline-none focus:ring-2 focus:ring-[#F4B41A]">
+                    <input type="text" id="loginUser" required placeholder="Memuat sistem..." disabled class="w-full px-4 py-3 bg-gray-100 rounded-xl border border-[#4A0E0E]/20 text-sm focus:outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-[#5A1818] mb-1">Password</label>
-                    <input type="password" id="loginPass" required placeholder="Masukkan password..." class="w-full px-4 py-3 bg-[#FAF4F0] rounded-xl border border-[#4A0E0E]/20 text-sm focus:outline-none focus:ring-2 focus:ring-[#F4B41A]">
+                    <input type="password" id="loginPass" required placeholder="Memuat sistem..." disabled class="w-full px-4 py-3 bg-gray-100 rounded-xl border border-[#4A0E0E]/20 text-sm focus:outline-none">
                 </div>
                 <div id="loginError" class="text-xs text-red-600 font-medium text-center hidden">Username atau Password salah!</div>
-                <button type="submit" class="w-full py-3.5 bg-[#5A1818] text-white font-semibold rounded-xl text-sm hover:bg-[#431212] smooth-transition shadow-md">
-                    MASUK KE WEB
+                <button type="submit" id="loginBtn" disabled class="w-full py-3.5 bg-gray-400 text-white font-semibold rounded-xl text-sm smooth-transition shadow-md cursor-not-allowed">
+                    Menghubungkan ke Database...
                 </button>
             </form>
             <p class="text-[10px] text-gray-400 mt-6">© 2026 Web Vierzen • Authorized Access Only</p>
@@ -313,45 +313,7 @@
         </div>
     </div>
 
-    <!-- LOGIN & APP SCRIPT -->
-    <script>
-        // --- KONFIGURASI USERNAME & PASSWORD STATIS ---
-        // Anda bebas mengubah username dan password di bawah ini sesuai keinginan:
-        const CORRECT_USER = "vierzen";
-        const CORRECT_PASS = "badminton2026";
-
-        // Cek status login saat halaman dimuat
-        window.addEventListener('DOMContentLoaded', () => {
-            const isLogged = localStorage.getItem('vierzen_logged');
-            if (isLogged === 'true') {
-                document.getElementById('loginScreen').classList.add('hidden');
-                document.getElementById('mainApp').classList.remove('hidden');
-            }
-        });
-
-        window.handleLogin = function(event) {
-            event.preventDefault();
-            const uInput = document.getElementById('loginUser').value.trim();
-            const pInput = document.getElementById('loginPass').value.trim();
-            const errDiv = document.getElementById('loginError');
-
-            if (uInput === CORRECT_USER && pInput === CORRECT_PASS) {
-                localStorage.setItem('vierzen_logged', 'true');
-                document.getElementById('loginScreen').classList.add('hidden');
-                document.getElementById('mainApp').classList.remove('hidden');
-            } else {
-                errDiv.classList.remove('hidden');
-                document.getElementById('loginPass').value = '';
-            }
-        };
-
-        window.handleLogout = function() {
-            localStorage.removeItem('vierzen_logged');
-            location.reload();
-        };
-    </script>
-
-    <!-- FIREBASE & 83 EXACT STUDENT DATA SCRIPT -->
+    <!-- FIREBASE & FIRESTORE LOGIN AUTH SCRIPT -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
         import { getFirestore, collection, getDocs, addDoc, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
@@ -367,6 +329,70 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+
+        // --- AMBIL KREDENSIAL DARI FIRESTORE SAAT HALAMAN DIMUAT ---
+        let dbUser = "";
+        let dbPass = "";
+
+        async function fetchAdminCredentials() {
+            try {
+                const docRef = doc(db, "settings", "auth");
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    dbUser = docSnap.data().username;
+                    dbPass = docSnap.data().password;
+
+                    // Aktifkan form login setelah data siap
+                    const uInput = document.getElementById('loginUser');
+                    const pInput = document.getElementById('loginPass');
+                    const btn = document.getElementById('loginBtn');
+
+                    uInput.disabled = false;
+                    pInput.disabled = false;
+                    uInput.placeholder = "Masukkan username...";
+                    pInput.placeholder = "Masukkan password...";
+                    btn.disabled = false;
+                    btn.className = "w-full py-3.5 bg-[#5A1818] text-white font-semibold rounded-xl text-sm hover:bg-[#431212] smooth-transition shadow-md cursor-pointer";
+                    btn.innerText = "MASUK KE WEB";
+                } else {
+                    alert("Dokumen setting/auth belum dibuat di Firestore!");
+                }
+            } catch (error) {
+                console.error("Gagal mengambil kredensial:", error);
+            }
+        }
+
+        fetchAdminCredentials();
+
+        // Cek status login lokal
+        window.addEventListener('DOMContentLoaded', () => {
+            const isLogged = localStorage.getItem('vierzen_logged');
+            if (isLogged === 'true') {
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('mainApp').classList.remove('hidden');
+            }
+        });
+
+        window.handleLoginFromFirebase = function(event) {
+            event.preventDefault();
+            const uInput = document.getElementById('loginUser').value.trim();
+            const pInput = document.getElementById('loginPass').value.trim();
+            const errDiv = document.getElementById('loginError');
+
+            if (uInput === dbUser && pInput === dbPass) {
+                localStorage.setItem('vierzen_logged', 'true');
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('mainApp').classList.remove('hidden');
+            } else {
+                errDiv.classList.remove('hidden');
+                document.getElementById('loginPass').value = '';
+            }
+        };
+
+        window.handleLogout = function() {
+            localStorage.removeItem('vierzen_logged');
+            location.reload();
+        };
 
         // Data 83 Murid persis dari spreadsheet
         window.studentsData = [
@@ -612,7 +638,6 @@
             }
         };
 
-        // Fungsi Ekspor Rekap ke Excel
         window.exportAttendanceToExcel = function() {
             const currentDate = document.getElementById('attendanceDate').value;
             const currentAttendance = window.attendanceRecords[currentDate] || {};
@@ -639,7 +664,6 @@
             XLSX.writeFile(workbook, `Rekap_Absen_Vierzen_${currentDate}.xlsx`);
         };
 
-        // Fungsi Format Teks WhatsApp
         window.openWhatsAppModal = function() {
             const currentDate = document.getElementById('attendanceDate').value;
             const currentAttendance = window.attendanceRecords[currentDate] || {};
@@ -700,7 +724,6 @@
             });
         };
 
-        // Fungsi Reset / Hapus Data Semester Sebelumnya
         window.resetAttendanceData = async function() {
             const confirmation = confirm("PERINGATAN: Aksi ini akan menghapus semua data absensi yang tersimpan untuk memulai semester/periode baru. Lanjutkan?");
             if (!confirmation) return;
@@ -749,13 +772,12 @@
         initApp();
     </script>
 
-    <!-- UI TAB SWITCHING, SIDEBAR MINIMIZE & AUTOMATIC CSV PARSER LOGIC -->
+    <!-- UI TAB SWITCHING & SIDEBAR LOGIC -->
     <script>
         const FIXED_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTmvQCqrahTIP5-QAswevHsttnqbFCOmZLpJ1XKPHW3EshjDqwpvghNPYGxtPrXhg/pub?output=csv";
 
         let isSidebarMinimized = false;
 
-        // Fungsi Minimize Sidebar (Desktop)
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const minimizeIcon = document.getElementById('minimizeIcon');
@@ -778,7 +800,6 @@
             }
         }
 
-        // Fungsi Buka/Tutup Sidebar Mobile (Ala Gemini)
         function toggleMobileSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebarOverlay');
@@ -846,7 +867,7 @@
                 });
             } catch (error) {
                 console.error("Gagal memuat CSV:", error);
-                tbody.innerHTML = `<tr><td colspan="6" align="center" class="p-6 text-red-500">Gagal mengambil data dari URL CSV tersebut (Pastikan file Google Sheets sudah dipublikasikan ke web sebagai CSV).</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" align="center" class="p-6 text-red-500">Gagal mengambil data dari URL CSV tersebut.</td></tr>`;
             }
         }
 
