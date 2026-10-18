@@ -19,11 +19,9 @@
             font-family: 'Inter', sans-serif;
             background-color: #F5EBE6;
         }
-        /* Smooth transitions */
         .smooth-transition {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
         }
@@ -38,203 +36,237 @@
 </head>
 <body class="flex h-screen overflow-hidden text-[#4A0E0E]">
 
-    <!-- MOBILE OVERLAY BACKDROP -->
-    <div id="sidebarOverlay" onclick="toggleMobileSidebar()" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-30 hidden md:hidden smooth-transition"></div>
+    <!-- ================= LAYAR LOGIN SEDERHANA ================= -->
+    <div id="loginScreen" class="fixed inset-0 bg-[#FAF4F0] z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-[#4A0E0E]/10 text-center animate-fade-in">
+            <img src="logo_vierzen.png" alt="Logo Vierzen" class="w-20 h-20 mx-auto mb-4 object-contain rounded-full bg-[#FAF4F0] p-1 shadow-md" onerror="this.src='https://via.placeholder.com/80?text=V'">
+            <h2 class="text-2xl font-extrabold text-[#4A0E0E] mb-1">Akses Terbatas Vierzen</h2>
+            <p class="text-xs text-[#7A4A4A] mb-6">Masukkan Username dan Password resmi untuk masuk ke dalam sistem.</p>
+            
+            <form onsubmit="handleLogin(event)" class="space-y-4 text-left">
+                <div>
+                    <label class="block text-xs font-semibold text-[#5A1818] mb-1">Username</label>
+                    <input type="text" id="loginUser" required placeholder="Masukkan username..." class="w-full px-4 py-3 bg-[#FAF4F0] rounded-xl border border-[#4A0E0E]/20 text-sm focus:outline-none focus:ring-2 focus:ring-[#F4B41A]">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-[#5A1818] mb-1">Password</label>
+                    <input type="password" id="loginPass" required placeholder="Masukkan password..." class="w-full px-4 py-3 bg-[#FAF4F0] rounded-xl border border-[#4A0E0E]/20 text-sm focus:outline-none focus:ring-2 focus:ring-[#F4B41A]">
+                </div>
+                <div id="loginError" class="text-xs text-red-600 font-medium text-center hidden">Username atau Password salah!</div>
+                <button type="submit" class="w-full py-3.5 bg-[#5A1818] text-white font-semibold rounded-xl text-sm hover:bg-[#431212] smooth-transition shadow-md">
+                    MASUK KE WEB
+                </button>
+            </form>
+            <p class="text-[10px] text-gray-400 mt-6">© 2026 Web Vierzen • Authorized Access Only</p>
+        </div>
+    </div>
 
-    <!-- SIDEBAR -->
-    <aside id="sidebar" class="w-72 bg-[#F4B41A] flex flex-col justify-between p-6 shadow-2xl z-40 smooth-transition fixed inset-y-0 left-0 transform -translate-x-full md:translate-x-0 md:relative shrink-0">
-        <div>
-            <!-- Logo & Title & Minimize Toggle -->
-            <div class="flex items-center justify-between mb-10">
-                <div id="sidebarHeader" class="flex items-center space-x-3 overflow-hidden smooth-transition">
-                    <img src="logo_vierzen.png" alt="Logo Vierzen" class="w-12 h-12 shrink-0 object-contain rounded-full bg-white p-1 shadow-md" onerror="this.src='https://via.placeholder.com/48?text=V'">
-                    <div class="sidebar-text smooth-transition">
-                        <h1 class="font-bold text-lg tracking-wide text-[#4A0E0E] whitespace-nowrap">VIERZEN</h1>
-                        <p class="text-xs text-[#5A1818] opacity-80 whitespace-nowrap">Badminton & Community</p>
+    <!-- ================= APLIKASI UTAMA (DIBUNGKUS WRAPPER) ================= -->
+    <div id="mainApp" class="flex h-screen w-screen overflow-hidden hidden">
+
+        <!-- MOBILE OVERLAY BACKDROP -->
+        <div id="sidebarOverlay" onclick="toggleMobileSidebar()" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-30 hidden md:hidden smooth-transition"></div>
+
+        <!-- SIDEBAR -->
+        <aside id="sidebar" class="w-72 bg-[#F4B41A] flex flex-col justify-between p-6 shadow-2xl z-40 smooth-transition fixed inset-y-0 left-0 transform -translate-x-full md:translate-x-0 md:relative shrink-0">
+            <div>
+                <!-- Logo & Title & Minimize Toggle -->
+                <div class="flex items-center justify-between mb-10">
+                    <div id="sidebarHeader" class="flex items-center space-x-3 overflow-hidden smooth-transition">
+                        <img src="logo_vierzen.png" alt="Logo Vierzen" class="w-12 h-12 shrink-0 object-contain rounded-full bg-white p-1 shadow-md" onerror="this.src='https://via.placeholder.com/48?text=V'">
+                        <div class="sidebar-text smooth-transition">
+                            <h1 class="font-bold text-lg tracking-wide text-[#4A0E0E] whitespace-nowrap">VIERZEN</h1>
+                            <p class="text-xs text-[#5A1818] opacity-80 whitespace-nowrap">Badminton & Community</p>
+                        </div>
                     </div>
-                </div>
-                <!-- Tombol Minimize (Desktop) & Close (Mobile) -->
-                <button onclick="toggleSidebar()" class="p-2 text-[#4A0E0E] hover:bg-white/30 rounded-xl smooth-transition hidden md:flex items-center justify-center" title="Minimize Sidebar">
-                    <i id="minimizeIcon" class="fa-solid fa-angles-left"></i>
-                </button>
-                <button onclick="toggleMobileSidebar()" class="p-2 text-[#4A0E0E] hover:bg-white/30 rounded-xl smooth-transition md:hidden flex items-center justify-center">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-
-            <!-- Navigation Links -->
-            <nav class="space-y-2">
-                <button onclick="switchTab('dashboard')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-left smooth-transition bg-[#5A1818] text-white shadow-lg" data-target="dashboard" title="Dashboard">
-                    <i class="fa-solid fa-house w-5 shrink-0 text-center"></i>
-                    <span class="sidebar-text smooth-transition whitespace-nowrap">Dashboard</span>
-                </button>
-                <button onclick="switchTab('bukukas')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-left smooth-transition text-[#4A0E0E] hover:bg-white/40" data-target="bukukas" title="Buku Kas Vierzen">
-                    <i class="fa-solid fa-book-open w-5 shrink-0 text-center"></i>
-                    <span class="sidebar-text smooth-transition whitespace-nowrap">Buku Kas Vierzen</span>
-                </button>
-                <button onclick="switchTab('absensi')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-left smooth-transition text-[#4A0E0E] hover:bg-white/40" data-target="absensi" title="Absensi Mingguan Murid">
-                    <i class="fa-solid fa-clipboard-user w-5 shrink-0 text-center"></i>
-                    <span class="sidebar-text smooth-transition whitespace-nowrap">Absensi Mingguan Murid</span>
-                </button>
-            </nav>
-        </div>
-
-        <!-- Sidebar Footer info -->
-        <div class="sidebar-text text-xs text-[#5A1818] opacity-70 text-center pt-4 border-t border-[#4A0E0E]/10 smooth-transition whitespace-nowrap">
-            Vierzen System v2.0
-        </div>
-    </aside>
-
-    <!-- MAIN CONTENT CONTAINER -->
-    <main class="flex-1 flex flex-col h-screen overflow-y-auto bg-[#FAF4F0] p-6 md:p-8 relative w-full">
-        
-        <!-- MOBILE HEADER BAR (Hamburger ala Gemini) -->
-        <div class="md:hidden flex items-center mb-6 bg-white p-3 rounded-2xl shadow-xs border border-[#4A0E0E]/10">
-            <button onclick="toggleMobileSidebar()" class="p-2 text-[#4A0E0E] hover:bg-[#FAF4F0] rounded-xl smooth-transition mr-3">
-                <i class="fa-solid fa-bars text-xl"></i>
-            </button>
-            <div class="flex items-center space-x-2">
-                <img src="logo_vierzen.png" alt="Logo" class="w-8 h-8 object-contain rounded-full bg-white p-0.5 shadow-xs" onerror="this.src='https://via.placeholder.com/32?text=V'">
-                <span class="font-bold text-sm text-[#4A0E0E]">Vierzen System</span>
-            </div>
-        </div>
-
-        <!-- DASHBOARD TAB -->
-        <section id="tab-dashboard" class="tab-content flex flex-col justify-center items-center h-full text-center animate-fade-in">
-            <div class="bg-white/80 backdrop-blur-md p-8 md:p-12 rounded-3xl shadow-xl max-w-2xl w-full border border-[#4A0E0E]/10 transform hover:scale-[1.01] smooth-transition">
-                <img src="logo_vierzen.png" alt="Logo" class="w-24 h-24 mx-auto mb-6 object-contain drop-shadow-md" onerror="this.src='https://via.placeholder.com/96?text=Vierzen'">
-                <h1 class="text-3xl md:text-4xl font-extrabold text-[#4A0E0E] mb-4 tracking-tight">Welcome To Vierzen!</h1>
-                <p class="text-[#6B3A3A] text-sm md:text-base leading-relaxed mb-8">
-                    Platform terpusat untuk mempermudah akses informasi keuangan buku kas serta manajemen absensi mingguan murid dengan cepat, transparan, dan terintegrasi.
-                </p>
-                <div class="flex flex-col sm:flex-row justify-center gap-4">
-                    <button onclick="switchTab('bukukas')" class="px-6 py-3 bg-[#F4B41A] text-[#4A0E0E] font-semibold rounded-xl shadow-md hover:bg-[#e0a210] smooth-transition">
-                        Cek Buku Kas
+                    <!-- Tombol Minimize (Desktop) & Close (Mobile) -->
+                    <button onclick="toggleSidebar()" class="p-2 text-[#4A0E0E] hover:bg-white/30 rounded-xl smooth-transition hidden md:flex items-center justify-center" title="Minimize Sidebar">
+                        <i id="minimizeIcon" class="fa-solid fa-angles-left"></i>
                     </button>
-                    <button onclick="switchTab('absensi')" class="px-6 py-3 bg-[#5A1818] text-white font-semibold rounded-xl shadow-md hover:bg-[#431212] smooth-transition">
-                        Kelola Absensi
+                    <button onclick="toggleMobileSidebar()" class="p-2 text-[#4A0E0E] hover:bg-white/30 rounded-xl smooth-transition md:hidden flex items-center justify-center">
+                        <i class="fa-solid fa-xmark text-lg"></i>
                     </button>
                 </div>
-            </div>
-        </section>
 
-        <!-- BUKU KAS VIERZEN TAB -->
-        <section id="tab-bukukas" class="tab-content hidden flex-col h-full">
-            <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                    <h2 class="text-2xl md:text-3xl font-bold text-[#4A0E0E]">Buku Kas Vierzen</h2>
-                    <p class="text-xs md:text-sm text-[#7A4A4A]">Laporan keuangan transparan bersumber dari data spreadsheet (CSV).</p>
-                </div>
-                <div>
-                    <button onclick="loadCsvData()" class="px-4 py-2 bg-[#5A1818] text-white text-sm font-semibold rounded-xl hover:bg-[#431212] smooth-transition shadow flex items-center gap-2">
-                        <i class="fa-solid fa-rotate"></i> Muat Ulang Data
+                <!-- Navigation Links -->
+                <nav class="space-y-2">
+                    <button onclick="switchTab('dashboard')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-left smooth-transition bg-[#5A1818] text-white shadow-lg" data-target="dashboard" title="Dashboard">
+                        <i class="fa-solid fa-house w-5 shrink-0 text-center"></i>
+                        <span class="sidebar-text smooth-transition whitespace-nowrap">Dashboard</span>
                     </button>
+                    <button onclick="switchTab('bukukas')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-left smooth-transition text-[#4A0E0E] hover:bg-white/40" data-target="bukukas" title="Buku Kas Vierzen">
+                        <i class="fa-solid fa-book-open w-5 shrink-0 text-center"></i>
+                        <span class="sidebar-text smooth-transition whitespace-nowrap">Buku Kas Vierzen</span>
+                    </button>
+                    <button onclick="switchTab('absensi')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-left smooth-transition text-[#4A0E0E] hover:bg-white/40" data-target="absensi" title="Absensi Mingguan Murid">
+                        <i class="fa-solid fa-clipboard-user w-5 shrink-0 text-center"></i>
+                        <span class="sidebar-text smooth-transition whitespace-nowrap">Absensi Mingguan Murid</span>
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Sidebar Footer info & Logout -->
+            <div class="space-y-3 pt-4 border-t border-[#4A0E0E]/10">
+                <div class="sidebar-text text-xs text-[#5A1818] opacity-70 text-center smooth-transition whitespace-nowrap">
+                    Vierzen System v2.0
                 </div>
-            </div>
-
-            <!-- Tabel Buku Kas -->
-            <div class="flex-1 bg-white rounded-2xl shadow-md border border-[#4A0E0E]/10 overflow-hidden flex flex-col">
-                <div class="overflow-x-auto flex-1">
-                    <table id="cashTable" class="w-full text-left border-collapse min-w-[600px]">
-                        <thead class="bg-[#5A1818] text-white sticky top-0">
-                            <tr id="tableHeader">
-                                <th class="p-4 font-semibold text-sm">Tanggal</th>
-                                <th class="p-4 font-semibold text-sm">Keterangan</th>
-                                <th class="p-4 font-semibold text-sm">Kegiatan</th>
-                                <th class="p-4 font-semibold text-sm">Pemasukan</th>
-                                <th class="p-4 font-semibold text-sm">Pengeluaran</th>
-                                <th class="p-4 font-semibold text-sm">Saldo</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableBody" class="divide-y divide-gray-100 text-sm">
-                            <tr class="hover:bg-[#FAF4F0] smooth-transition">
-                                <td class="p-4 text-gray-500" colspan="6" align="center">Memuat data buku kas...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- ABSENSI MINGGUAN MURID TAB -->
-        <section id="tab-absensi" class="tab-content hidden flex-col max-w-4xl mx-auto w-full pb-10">
-            <div class="mb-6">
-                <h2 class="text-2xl md:text-3xl font-bold text-[#4A0E0E] text-center mb-1">Absensi Mingguan Murid</h2>
-                <p class="text-xs text-center text-[#7A4A4A]">Catat kehadiran, kelola data siswa, dan sinkronkan secara real-time.</p>
-            </div>
-
-            <!-- Control Bar (Date & Search) -->
-            <div class="bg-white p-4 rounded-2xl shadow-sm border border-[#4A0E0E]/10 mb-4 flex flex-col sm:flex-row gap-4 items-center justify-between">
-                <div class="flex items-center gap-2 w-full sm:w-auto">
-                    <span class="bg-[#5A1818] text-white px-3 py-2 rounded-xl text-sm"><i class="fa-solid fa-calendar-days"></i></span>
-                    <input type="date" id="attendanceDate" class="px-4 py-2 bg-[#FAF4F0] rounded-xl border border-[#4A0E0E]/20 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#F4B41A] w-full sm:w-auto">
-                </div>
-                <div class="relative w-full sm:w-80">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                    </span>
-                    <input type="text" id="searchStudent" placeholder="Cari nama murid..." onkeyup="filterStudents()" class="w-full pl-10 pr-4 py-2 bg-[#FAF4F0] rounded-xl border border-[#4A0E0E]/20 text-sm focus:outline-none focus:ring-2 focus:ring-[#F4B41A]">
-                </div>
-            </div>
-
-            <!-- Daftar Murid Container -->
-            <div class="bg-white rounded-2xl shadow-sm border border-[#4A0E0E]/10 p-4 min-h-[380px] max-h-[520px] overflow-y-auto space-y-3 mb-4" id="studentListContainer">
-                <div class="text-center py-10 text-gray-400 text-sm">Memuat daftar murid...</div>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="flex flex-col sm:flex-row gap-4 mb-8">
-                <button onclick="openAddStudentModal()" class="flex-1 py-3 bg-[#5A1818] text-white font-semibold rounded-xl shadow hover:bg-[#431212] smooth-transition flex items-center justify-center gap-2 text-sm">
-                    <i class="fa-solid fa-user-plus"></i> Tambahkan Siswa
-                </button>
-                <button onclick="saveAttendance()" class="flex-1 py-3 bg-[#F4B41A] text-[#4A0E0E] font-semibold rounded-xl shadow hover:bg-[#e0a210] smooth-transition flex items-center justify-center gap-2 text-sm">
-                    <i class="fa-solid fa-floppy-disk"></i> SIMPAN
+                <button onclick="handleLogout()" class="w-full py-2 bg-[#5A1818] text-white text-xs font-semibold rounded-xl hover:bg-[#431212] smooth-transition flex items-center justify-center gap-2 shadow-xs">
+                    <i class="fa-solid fa-right-from-bracket"></i> <span class="sidebar-text">Keluar / Logout</span>
                 </button>
             </div>
+        </aside>
 
-            <!-- BAGIAN BAWAH: REKAPITULASI DAN TOMBOL (EXCEL, FORMAT WA, RESET) -->
-            <div class="bg-white rounded-2xl shadow-sm border border-[#4A0E0E]/10 p-6 mb-6">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
-                    <h3 class="text-base md:text-lg font-bold text-[#4A0E0E] flex items-center gap-2">
-                        <i class="fa-solid fa-chart-pie text-[#F4B41A]"></i> Rekap Data Absen Keseluruhan Siswa
-                    </h3>
-                    <div class="flex flex-wrap gap-2 w-full sm:w-auto">
-                        <button onclick="exportAttendanceToExcel()" class="flex-1 sm:flex-none px-3.5 py-2.5 bg-green-700 text-white font-semibold rounded-xl text-xs hover:bg-green-800 smooth-transition flex items-center justify-center gap-2 shadow" title="Download Excel">
-                            <i class="fa-solid fa-file-excel"></i> Excel
+        <!-- MAIN CONTENT CONTAINER -->
+        <main class="flex-1 flex flex-col h-screen overflow-y-auto bg-[#FAF4F0] p-6 md:p-8 relative w-full">
+            
+            <!-- MOBILE HEADER BAR (Hamburger ala Gemini) -->
+            <div class="md:hidden flex items-center mb-6 bg-white p-3 rounded-2xl shadow-xs border border-[#4A0E0E]/10">
+                <button onclick="toggleMobileSidebar()" class="p-2 text-[#4A0E0E] hover:bg-[#FAF4F0] rounded-xl smooth-transition mr-3">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+                <div class="flex items-center space-x-2">
+                    <img src="logo_vierzen.png" alt="Logo" class="w-8 h-8 object-contain rounded-full bg-white p-0.5 shadow-xs" onerror="this.src='https://via.placeholder.com/32?text=V'">
+                    <span class="font-bold text-sm text-[#4A0E0E]">Vierzen System</span>
+                </div>
+            </div>
+
+            <!-- DASHBOARD TAB -->
+            <section id="tab-dashboard" class="tab-content flex flex-col justify-center items-center h-full text-center animate-fade-in">
+                <div class="bg-white/80 backdrop-blur-md p-8 md:p-12 rounded-3xl shadow-xl max-w-2xl w-full border border-[#4A0E0E]/10 transform hover:scale-[1.01] smooth-transition">
+                    <img src="logo_vierzen.png" alt="Logo" class="w-24 h-24 mx-auto mb-6 object-contain drop-shadow-md" onerror="this.src='https://via.placeholder.com/96?text=Vierzen'">
+                    <h1 class="text-3xl md:text-4xl font-extrabold text-[#4A0E0E] mb-4 tracking-tight">Welcome To Vierzen!</h1>
+                    <p class="text-[#6B3A3A] text-sm md:text-base leading-relaxed mb-8">
+                        Platform terpusat untuk mempermudah akses informasi keuangan buku kas serta manajemen absensi mingguan murid dengan cepat, transparan, dan terintegrasi.
+                    </p>
+                    <div class="flex flex-col sm:flex-row justify-center gap-4">
+                        <button onclick="switchTab('bukukas')" class="px-6 py-3 bg-[#F4B41A] text-[#4A0E0E] font-semibold rounded-xl shadow-md hover:bg-[#e0a210] smooth-transition">
+                            Cek Buku Kas
                         </button>
-                        <button onclick="openWhatsAppModal()" class="flex-1 sm:flex-none px-3.5 py-2.5 bg-emerald-600 text-white font-semibold rounded-xl text-xs hover:bg-emerald-700 smooth-transition flex items-center justify-center gap-2 shadow" title="Format Pesan WhatsApp">
-                            <i class="fa-brands fa-whatsapp text-sm"></i> Format WA
-                        </button>
-                        <button onclick="resetAttendanceData()" class="flex-1 sm:flex-none px-3.5 py-2.5 bg-red-700 text-white font-semibold rounded-xl text-xs hover:bg-red-800 smooth-transition flex items-center justify-center gap-2 shadow" title="Hapus semua data absensi">
-                            <i class="fa-solid fa-trash-can"></i> Reset
+                        <button onclick="switchTab('absensi')" class="px-6 py-3 bg-[#5A1818] text-white font-semibold rounded-xl shadow-md hover:bg-[#431212] smooth-transition">
+                            Kelola Absensi
                         </button>
                     </div>
                 </div>
-                <div class="overflow-x-auto max-h-72">
-                    <table class="w-full text-left border-collapse min-w-[500px]">
-                        <thead class="bg-[#FAF4F0] text-[#4A0E0E] sticky top-0 text-xs">
-                            <tr>
-                                <th class="p-3 font-semibold">No</th>
-                                <th class="p-3 font-semibold">Nama Siswa</th>
-                                <th class="p-3 font-semibold">Kelas</th>
-                                <th class="p-3 font-semibold text-center">Status pada Tanggal Ini</th>
-                            </tr>
-                        </thead>
-                        <tbody id="attendanceSummaryBody" class="divide-y divide-gray-100 text-xs">
-                            <tr>
-                                <td colspan="4" class="p-4 text-center text-gray-400">Memuat rekap...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
+            </section>
 
-        <!-- FOOTER / COPYRIGHT -->
-        <footer class="mt-8 text-center text-xs text-[#5A1818] opacity-75 py-4 border-t border-[#4A0E0E]/10">
-            <p>© 2026 Web Vierzen. Licensed under MIT License by <strong>Jembar Muhammad Firdiana</strong>.</p>
-        </footer>
-    </main>
+            <!-- BUKU KAS VIERZEN TAB -->
+            <section id="tab-bukukas" class="tab-content hidden flex-col h-full">
+                <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h2 class="text-2xl md:text-3xl font-bold text-[#4A0E0E]">Buku Kas Vierzen</h2>
+                        <p class="text-xs md:text-sm text-[#7A4A4A]">Laporan keuangan transparan bersumber dari data spreadsheet (CSV).</p>
+                    </div>
+                    <div>
+                        <button onclick="loadCsvData()" class="px-4 py-2 bg-[#5A1818] text-white text-sm font-semibold rounded-xl hover:bg-[#431212] smooth-transition shadow flex items-center gap-2">
+                            <i class="fa-solid fa-rotate"></i> Muat Ulang Data
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tabel Buku Kas -->
+                <div class="flex-1 bg-white rounded-2xl shadow-md border border-[#4A0E0E]/10 overflow-hidden flex flex-col">
+                    <div class="overflow-x-auto flex-1">
+                        <table id="cashTable" class="w-full text-left border-collapse min-w-[600px]">
+                            <thead class="bg-[#5A1818] text-white sticky top-0">
+                                <tr id="tableHeader">
+                                    <th class="p-4 font-semibold text-sm">Tanggal</th>
+                                    <th class="p-4 font-semibold text-sm">Keterangan</th>
+                                    <th class="p-4 font-semibold text-sm">Kegiatan</th>
+                                    <th class="p-4 font-semibold text-sm">Pemasukan</th>
+                                    <th class="p-4 font-semibold text-sm">Pengeluaran</th>
+                                    <th class="p-4 font-semibold text-sm">Saldo</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody" class="divide-y divide-gray-100 text-sm">
+                                <tr class="hover:bg-[#FAF4F0] smooth-transition">
+                                    <td class="p-4 text-gray-500" colspan="6" align="center">Memuat data buku kas...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ABSENSI MINGGUAN MURID TAB -->
+            <section id="tab-absensi" class="tab-content hidden flex-col max-w-4xl mx-auto w-full pb-10">
+                <div class="mb-6">
+                    <h2 class="text-2xl md:text-3xl font-bold text-[#4A0E0E] text-center mb-1">Absensi Mingguan Murid</h2>
+                    <p class="text-xs text-center text-[#7A4A4A]">Catat kehadiran, kelola data siswa, dan sinkronkan secara real-time.</p>
+                </div>
+
+                <!-- Control Bar (Date & Search) -->
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-[#4A0E0E]/10 mb-4 flex flex-col sm:flex-row gap-4 items-center justify-between">
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <span class="bg-[#5A1818] text-white px-3 py-2 rounded-xl text-sm"><i class="fa-solid fa-calendar-days"></i></span>
+                        <input type="date" id="attendanceDate" class="px-4 py-2 bg-[#FAF4F0] rounded-xl border border-[#4A0E0E]/20 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#F4B41A] w-full sm:w-auto">
+                    </div>
+                    <div class="relative w-full sm:w-80">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </span>
+                        <input type="text" id="searchStudent" placeholder="Cari nama murid..." onkeyup="filterStudents()" class="w-full pl-10 pr-4 py-2 bg-[#FAF4F0] rounded-xl border border-[#4A0E0E]/20 text-sm focus:outline-none focus:ring-2 focus:ring-[#F4B41A]">
+                    </div>
+                </div>
+
+                <!-- Daftar Murid Container -->
+                <div class="bg-white rounded-2xl shadow-sm border border-[#4A0E0E]/10 p-4 min-h-[380px] max-h-[520px] overflow-y-auto space-y-3 mb-4" id="studentListContainer">
+                    <div class="text-center py-10 text-gray-400 text-sm">Memuat daftar murid...</div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row gap-4 mb-8">
+                    <button onclick="openAddStudentModal()" class="flex-1 py-3 bg-[#5A1818] text-white font-semibold rounded-xl shadow hover:bg-[#431212] smooth-transition flex items-center justify-center gap-2 text-sm">
+                        <i class="fa-solid fa-user-plus"></i> Tambahkan Siswa
+                    </button>
+                    <button onclick="saveAttendance()" class="flex-1 py-3 bg-[#F4B41A] text-[#4A0E0E] font-semibold rounded-xl shadow hover:bg-[#e0a210] smooth-transition flex items-center justify-center gap-2 text-sm">
+                        <i class="fa-solid fa-floppy-disk"></i> SIMPAN
+                    </button>
+                </div>
+
+                <!-- BAGIAN BAWAH: REKAPITULASI DAN TOMBOL (EXCEL, FORMAT WA, RESET) -->
+                <div class="bg-white rounded-2xl shadow-sm border border-[#4A0E0E]/10 p-6 mb-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
+                        <h3 class="text-base md:text-lg font-bold text-[#4A0E0E] flex items-center gap-2">
+                            <i class="fa-solid fa-chart-pie text-[#F4B41A]"></i> Rekap Data Absen Keseluruhan Siswa
+                        </h3>
+                        <div class="flex flex-wrap gap-2 w-full sm:w-auto">
+                            <button onclick="exportAttendanceToExcel()" class="flex-1 sm:flex-none px-3.5 py-2.5 bg-green-700 text-white font-semibold rounded-xl text-xs hover:bg-green-800 smooth-transition flex items-center justify-center gap-2 shadow" title="Download Excel">
+                                <i class="fa-solid fa-file-excel"></i> Excel
+                            </button>
+                            <button onclick="openWhatsAppModal()" class="flex-1 sm:flex-none px-3.5 py-2.5 bg-emerald-600 text-white font-semibold rounded-xl text-xs hover:bg-emerald-700 smooth-transition flex items-center justify-center gap-2 shadow" title="Format Pesan WhatsApp">
+                                <i class="fa-brands fa-whatsapp text-sm"></i> Format WA
+                            </button>
+                            <button onclick="resetAttendanceData()" class="flex-1 sm:flex-none px-3.5 py-2.5 bg-red-700 text-white font-semibold rounded-xl text-xs hover:bg-red-800 smooth-transition flex items-center justify-center gap-2 shadow" title="Hapus semua data absensi">
+                                <i class="fa-solid fa-trash-can"></i> Reset
+                            </button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto max-h-72">
+                        <table class="w-full text-left border-collapse min-w-[500px]">
+                            <thead class="bg-[#FAF4F0] text-[#4A0E0E] sticky top-0 text-xs">
+                                <tr>
+                                    <th class="p-3 font-semibold">No</th>
+                                    <th class="p-3 font-semibold">Nama Siswa</th>
+                                    <th class="p-3 font-semibold">Kelas</th>
+                                    <th class="p-3 font-semibold text-center">Status pada Tanggal Ini</th>
+                                </tr>
+                            </thead>
+                            <tbody id="attendanceSummaryBody" class="divide-y divide-gray-100 text-xs">
+                                <tr>
+                                    <td colspan="4" class="p-4 text-center text-gray-400">Memuat rekap...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- FOOTER / COPYRIGHT -->
+            <footer class="mt-8 text-center text-xs text-[#5A1818] opacity-75 py-4 border-t border-[#4A0E0E]/10">
+                <p>© 2026 Web Vierzen. Licensed under MIT License by <strong>Jembar Muhammad Firdiana</strong>.</p>
+            </footer>
+        </main>
+    </div>
 
     <!-- MODAL WHATSAPP FORMAT -->
     <div id="whatsappModal" class="fixed inset-0 bg-black/50 backdrop-blur-xs hidden z-50 flex items-center justify-center p-4">
@@ -280,6 +312,44 @@
             </form>
         </div>
     </div>
+
+    <!-- LOGIN & APP SCRIPT -->
+    <script>
+        // --- KONFIGURASI USERNAME & PASSWORD STATIS ---
+        // Anda bebas mengubah username dan password di bawah ini sesuai keinginan:
+        const CORRECT_USER = "vierzen";
+        const CORRECT_PASS = "badminton2026";
+
+        // Cek status login saat halaman dimuat
+        window.addEventListener('DOMContentLoaded', () => {
+            const isLogged = localStorage.getItem('vierzen_logged');
+            if (isLogged === 'true') {
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('mainApp').classList.remove('hidden');
+            }
+        });
+
+        window.handleLogin = function(event) {
+            event.preventDefault();
+            const uInput = document.getElementById('loginUser').value.trim();
+            const pInput = document.getElementById('loginPass').value.trim();
+            const errDiv = document.getElementById('loginError');
+
+            if (uInput === CORRECT_USER && pInput === CORRECT_PASS) {
+                localStorage.setItem('vierzen_logged', 'true');
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('mainApp').classList.remove('hidden');
+            } else {
+                errDiv.classList.remove('hidden');
+                document.getElementById('loginPass').value = '';
+            }
+        };
+
+        window.handleLogout = function() {
+            localStorage.removeItem('vierzen_logged');
+            location.reload();
+        };
+    </script>
 
     <!-- FIREBASE & 83 EXACT STUDENT DATA SCRIPT -->
     <script type="module">
@@ -736,7 +806,6 @@
                 }
             });
 
-            // Tutup sidebar di HP saat menu dipilih
             if (window.innerWidth < 768) {
                 toggleMobileSidebar();
             }
@@ -781,7 +850,6 @@
             }
         }
 
-        // Otomatis muat data CSV saat halaman dibuka
         loadCsvData();
     </script>
 </body>
